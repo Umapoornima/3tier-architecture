@@ -1,0 +1,472 @@
+
+LINKS:
+https://www.geeksforgeeks.org/how-to-install-python-packages-for-aws-lambda-layers/
+
+https://www.w3schools.com/python/python_mysql_select.asp
+
+https://tecadmin.net/install-python-3-9-on-amazon-linux/
+
+https://phoenixnap.com/kb/how-to-create-new-mysql-user-account-grant-privileges
+
+https://docs.aws.amazon.com/lambda/latest/dg/services-apigateway-tutorial.html
+
+
+PYTHON 3.9 Installation
+========================
+sudo yum update -y
+sudo yum groupinstall "Development Tools" -y
+sudo yum install openssl-devel bzip2-devel libffi-devel -y
+
+cd /opt
+sudo wget https://www.python.org/ftp/python/3.9.7/Python-3.9.7.tgz
+sudo tar -xzf Python-3.9.7.tgz
+cd Python-3.9.7
+sudo ./configure --enable-optimizations
+sudo make altinstall
+sudo ln -s /usr/local/bin/python3.9 /usr/local/bin/python3
+python3.9 --version
+
+PIP & ZIP FILE
+----------------
+LINK: https://www.geeksforgeeks.org/how-to-install-python-packages-for-aws-lambda-layers/
+sudo yum install python3-pip
+sudo yum install zip
+cd -
+change directory to root folder === cd /
+sudo mkdir -p layer/python/lib/python3.9/site-packages
+sudo pip3 install requests -t layer/python/lib/python3.9/site-packages/
+cd layer
+sudo zip -r mypackage.zip *
+ls === zip file & python folder it should be thier
+
+(OR)
+after installing python3.9 version run following commands
+apt install python3-pip
+apt install zip
+mkdir -p layer/python/lib/python3.9/site-packages
+pip3 install mysql-connector-python -t layer/python/lib/python3.9/site-packages/
+zip -r mysql-connector-python.zip *
+
+mysql installation
+===================
+LINK: https://tecadmin.net/how-to-install-mysql-8-on-amazon-linux-2/
+
+sudo amazon-linux-extras install epel -y
+sudo yum install https://dev.mysql.com/get/mysql80-community-release-el7-5.noarch.rpm
+sudo yum install mysql-community-server
+sudo systemctl active mysqld
+sudo systemctl start mysqld
+sudo systemctl status mysqld
+sudo cat /var/log/mysqld.log | grep "A temporary password"
+sudo mysql_secure_installation            
+
+CREATE USER WITH PASSWORD WITH GRANT PERMISSIONS(uma, Poori@126)
+=================================================================
+CREATE USER 'uma'@'%' IDENTIFIED BY 'Poori@126';
+GRANT ALL PRIVILEGES ON *.* TO 'your_username'@'%' WITH GRANT OPTION;
+CREATE DATABASE Employees;
+show databases;
+use Employees;
+
+CREATE TABLE employees (
+employee_id INT NOT NULL AUTO_INCREMENT,
+employee_name VARCHAR(30) NOT NULL,
+employee_email VARCHAR(40) NOT NULL,
+employee_phone VARCHAR(20),
+PRIMARY KEY (employee_id)
+);
+
+show tables;
+
+
+INSERT INTO employees (employee_id, employee_name, employee_email, employee_phone)
+VALUES
+    (1, 'Durga', 'durga@3k.com', '9876543214'),
+    (2, 'Uma', 'uma@3k.com', '7093267984'),
+    (3, 'Vishak', 'vishak@3k.com', '9951537894'),
+    (4, 'Jayraj', 'jayraj@3k.com', '7894567894'),
+    (5, 'Manoj', 'manoj@3k.com', '8976523456');
+
+
+UPDATE employees
+SET employee_phone = 'NEW_PHONE_NUMBER'
+WHERE employee_name = 'Durga';
+
+
+
+
+
+INSERT INTO employees (employee_name, employee_email, employee_phone) VALUES ('Durga', 'durga@3k.com', '987654321'), ('Uma', 'uma@3k.com','7093267984');
+
+select * from employees;
+GRANT ALL PRIVILEGES ON Employees.* TO 'uma'@'%';
+SHOW GRANTS FOR 'uma'@'%';
+SELECT User, Host FROM mysql.user;
+
+DELETE FROM employees WHERE employee_name = 'Durga.lambda';  
+
+
+===> After creating database, create three lambda functions for get,post,delete and create triger events also for that by using below code
+===> If lambda function is executes sucessfully 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+GET_LMABDA_CODE
+===============
+import json
+import mysql.connector
+
+def lambda_handler(event, context):
+    # TODO implement
+    mydb = mysql.connector.connect(
+        host="3.95.237.104",
+        user="poornima",
+        password="Poori@126",
+        database="Employees"
+    )
+
+    mycursor = mydb.cursor()
+
+    mycursor.execute("SELECT * FROM employees;")
+
+    # Fetch all the rows from the cursor
+    rows = mycursor.fetchall()
+
+    # Convert the data to a JSON string
+    json_response = json.dumps(rows)
+    
+    # Close the cursor and the database connection
+    mycursor.close()
+    mydb.close()
+
+    return {
+        'statusCode': 200,
+        'body': json_response
+    }
+
+
+
+
+
+
+
+POST
+======
+import json
+import mysql.connector
+
+def lambda_handler(event, context):
+    mydb = mysql.connector.connect(
+        host="3.95.237.104",
+        user="poornima",
+        password="Poori@126",
+        database="Employees"
+    )
+
+    mycursor = mydb.cursor()
+    if 'EmpName' in event:
+        valEmpName = event['EmpName']
+        print('Value for EmpName:', valEmpName)
+
+    if 'EmpEmail' in event:
+        valEmpEmail = event['EmpEmail']
+        print('Value for EmpEmail:', valEmpEmail)
+
+    if 'EmpPhone' in event:
+        valEmpPhone = event['EmpPhone']
+        print('Value for EmpPhone:', valEmpPhone)
+
+    mycursor.execute("INSERT INTO employees (employee_name, employee_email, employee_phone) VALUES (%s, %s, %s)", (valEmpName, valEmpEmail, valEmpPhone))
+    mydb.commit()
+
+    # Close the cursor and the database connection
+    mycursor.close()
+    mydb.close()
+
+    return {
+        'statusCode': 200,
+        'body': "INSERT INTO employees (employee_name, employee_email, employee_phone) VALUES ('"+valEmpName+"','"+valEmpEmail+"','"+valEmpPhone+"');"
+    }
+
+
+
+TEST_EVENT
+============
+{
+  "EmpName": "John Doe",
+  "EmpEmail": "johndoe@example.com",
+  "EmpPhone": "1234567890"
+}
+
+
+
+
+
+DELETE
+========
+import json
+import mysql.connector
+
+def lambda_handler(event, context):
+    # TODO implement
+    mydb = mysql.connector.connect(
+        host="3.95.237.104",
+        user="poornima",
+        password="Poori@126",
+        database="Employees"
+    )
+
+    mycursor = mydb.cursor()
+
+    if 'EmpID' in event:
+        valEmpID = event['EmpID']
+        print('Value for key1:', valEmpID)
+
+        delete_query = "DELETE FROM employees WHERE employee_id = "+valEmpID+";"
+        mycursor.execute(delete_query)
+        # Get the number of affected rows
+        num_rows_affected = mycursor.rowcount
+
+        mydb.commit()
+
+    # Fetch all the rows from the cursor
+    # rows = mycursor.fetchall()
+
+    # Convert the data to a JSON string
+    # json_response = json.dumps(rows)
+
+    # Close the cursor and the database connection
+    mycursor.close()
+    mydb.close()
+
+    return {
+        'statusCode': 200,
+        'body': "Emp ID = "+valEmpID+", Deleted Records ="+str(num_rows_affected)
+    }
+
+
+EVENT_DELETE
+============
+{
+  "EmpID": "14"
+}
+
+
+
+
+
+
+
+
+
+
+
+FRONT_END_APPLICATION
+======================
+launch one ec2 instance in that install apache web server
+yum install httpd -y
+service httpd start
+service httpd status
+cd /var/www/html
+create one index.html file, touch index.html
+vim index.html
+paste the below code according to your database
+
+INDEX.HTML FILE FOR WEBAPPLICATION
+====================================
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Employee Database</title>
+</head>
+
+<body>
+    <h1>Employee Database</h1>
+    <button onclick="getEmployees()">Get Employees</button>
+    <button onclick="addEmployee()">Add Employee</button>
+    <button onclick="deleteEmployee()">Delete Employee</button>
+
+    <div id="output"></div>
+
+    <script>
+                const apigetUrl  = 'https://x78lythmo3.execute-api.us-east-1.amazonaws.com/DEV/getapi';
+                const apiPostUrl = 'https://s4wz8699cf.execute-api.us-east-1.amazonaws.com/dev/postresource';
+                const apiDelUrl  = 'https://wfyzgb4g1h.execute-api.us-east-1.amazonaws.com/dev/delete';        
+                function getEmployees() {
+            fetch(apigetUrl, {
+                    method: 'GET'
+                })
+                .then(response => response.json())
+                .then(data => {
+                                    alert('Response from the REST service:\n' + JSON.stringify(data));
+                    const outputDiv = document.getElementById('output');
+                    outputDiv.innerHTML = JSON.stringify(data, null, 2);
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        function addEmployee() {
+            const employeeName = prompt('Enter Employee Name:');
+            const employeeEmail = prompt('Enter Employee Email:');
+            const employeePhone = prompt('Enter Employee Phone:');
+
+            const data = {
+                EmpName: employeeName,
+                EmpEmail: employeeEmail,
+                EmpPhone: employeePhone
+            };
+
+            fetch(apiPostUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    alert("Inserted Employee ["+employeeName+"] Sucessfully"); // Show a success message or handle the response accordingly
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        function deleteEmployee() {
+            const employeeId = prompt('Enter Employee ID to Delete:');
+
+            if (!employeeId) {
+                alert('Employee ID is required.');
+                return;
+            }
+
+                        const data = {
+                EmpID: employeeId  
+            };
+
+            fetch(apiDelUrl, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                })
+                .then(response => response.json())
+                .then(data => {alert(JSON.stringify(data, null, 2))
+                })
+                .catch(error => console.error('Error:', error));
+        }
+    </script>
+</body>
+
+</html>
+
+
+
+
+
+FRONT_END_APPLICATION BY USING SINGLE API_GATEWAY
+=====================================================
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Employee Database</title>
+</head>
+
+<body>
+    <h1>Employee Database</h1>
+    <button onclick="getEmployees()">Get Employees</button>
+    <button onclick="addEmployee()">Add Employee</button>
+    <button onclick="deleteEmployee()">Delete Employee</button>
+
+    <div id="output"></div>
+
+    <script>
+        const apiUrl = 'https://0ynzox53of.execute-api.us-east-1.amazonaws.com/DEV/test';
+
+        function getEmployees() {
+            fetch(`${apiUrl}`, {
+                method: 'GET'
+            })
+            .then(response => response.json())
+            .then(data => {
+                const outputDiv = document.getElementById('output');
+                outputDiv.innerHTML = JSON.stringify(data, null, 2);
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function addEmployee() {
+            const employeeName = prompt('Enter Employee Name:');
+            const employeeEmail = prompt('Enter Employee Email:');
+            const employeePhone = prompt('Enter Employee Phone:');
+
+            const data = {
+                EmpName: employeeName,
+                EmpEmail: employeeEmail,
+                EmpPhone: employeePhone
+            };
+
+            fetch(`${apiUrl}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert("Inserted Employee [" + employeeName + "] Sucessfully");
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function deleteEmployee() {
+            const employeeId = prompt('Enter Employee ID to Delete:');
+
+            if (!employeeId) {
+                alert('Employee ID is required.');
+                return;
+            }
+
+            fetch(`${apiUrl}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ EmpID: employeeId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(JSON.stringify(data, null, 2));
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    </script>
+</body>
+
+</html>
+
+
+
+PROCEDURE
+==========
+1.First we need to launch one ec2 instance with amazon linux, in the security group we need to open mysql port number "3306"
+  In that server we need to install and configure mysql, we need to create tables and database
+2.we need to create lambda-function to fetch the data in database, for that lambda function we need to create layers & attach that layer to lambda function
+3.we need to create multiple methods under a single resource in a single api gateway and attach each lambda function to its corresponding method.
+4.we need to launch one ec2 instance for creating front-end application, for that we need install web server(appache)
+  according to your database write a code for for add,post,delete your data through front-end application
+
