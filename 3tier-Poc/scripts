@@ -273,8 +273,8 @@ EVENT_DELETE
 
 
 
-FRONT_END_APPLICATION
-======================
+FRONT_END_APPLICATION By USING THREE API-GATEWAY END POINTS
+===================================================================
 launch one ec2 instance in that install apache web server
 yum install httpd -y
 service httpd start
@@ -302,7 +302,7 @@ INDEX.HTML FILE FOR WEBAPPLICATION
     <div id="output"></div>
 
     <script>
-                const apigetUrl  = 'https://x78lythmo3.execute-api.us-east-1.amazonaws.com/DEV/getapi';
+                const apigetUrl  = 'https://x78lythmo3.execute-api.us-east-1.amazonaws.com/DEV/getapi';      # change your api gateway-end points gor GET,POST,DELETE
                 const apiPostUrl = 'https://s4wz8699cf.execute-api.us-east-1.amazonaws.com/dev/postresource';
                 const apiDelUrl  = 'https://wfyzgb4g1h.execute-api.us-east-1.amazonaws.com/dev/delete';        
                 function getEmployees() {
@@ -394,7 +394,7 @@ FRONT_END_APPLICATION BY USING SINGLE API_GATEWAY
     <div id="output"></div>
 
     <script>
-        const apiUrl = 'https://0ynzox53of.execute-api.us-east-1.amazonaws.com/DEV/test';
+        const apiUrl = 'https://0ynzox53of.execute-api.us-east-1.amazonaws.com/DEV/test';      # change your api-gateway end point
 
         function getEmployees() {
             fetch(`${apiUrl}`, {
