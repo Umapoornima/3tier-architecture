@@ -88,6 +88,8 @@ VALUES
     (5, 'Manoj', 'manoj@3k.com', '8976523456');
 
 
+SELECT * FROM employees;
+
 UPDATE employees
 SET employee_phone = 'NEW_PHONE_NUMBER'
 WHERE employee_name = 'Durga';
