@@ -57,8 +57,24 @@ sudo yum install mysql-community-server
 sudo systemctl active mysqld
 sudo systemctl start mysqld
 sudo systemctl status mysqld
+
+NOTE: If you face any errors while installing Mysql database just follow this below commands
+Link: https://stackoverflow.com/questions/71239450/gpg-keys-issue-while-installing-mysql-community-server
+      https://awswithatiq.com/how-to-install-mysql-on-amazon-linux-2023-fedora-version/
+
+sudo rpm --import https://repo.mysql.com/RPM-GPG-KEY-mysql-2023
+sudo wget https://dev.mysql.com/get/mysql80-community-release-el9-1.noarch.rpm 
+sudo ls -lrt
+sudo yum install mysql80-community-release-el9-1.noarch.rpm
+yum repolist enabled | grep "mysql.*-community.*"
+sudo yum install mysql-community-server
+sudo systemctl start mysqld
+sudo systemctl status mysqld
+
 sudo cat /var/log/mysqld.log | grep "A temporary password"
 sudo mysql_secure_installation            
+mysql -u root -p
+
 
 CREATE USER WITH PASSWORD WITH GRANT PERMISSIONS(uma, Poori@126)
 =================================================================
